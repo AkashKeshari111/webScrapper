@@ -11,6 +11,12 @@ const userSchema = new Schema(
       trim: true,
     },
     password: { type: String, required: true, minlength: 8 },
+    bookmarks: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "StoryBookmark",
+      },
+    ],
   },
   {
     timestamps: true,
