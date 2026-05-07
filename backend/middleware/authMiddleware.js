@@ -5,9 +5,11 @@ import { configDotenv } from "dotenv";
 export const authMiddleware = async (req, res, next) => {
   try {
     let token;
+    const authHeader = req.headers.authorization;
 
-    if (req.headers.authorization?.startsWith("Bearer")) {
-      token = req.headers.authorization.split(" ")[1];
+
+    if (authHeader?.startsWith("Bearer ")) {
+      token = authHeader.split(" ")[1];
     }
 
     if (!token) {
@@ -23,7 +25,15 @@ export const authMiddleware = async (req, res, next) => {
 
     next();
   } catch (error) {
-    console.log(error)
-    return sendResponse(res, 401, false, "Not authorized, token failed");
+
+     if (error.name === "TokenExpiredError") {
+      return sendResponse(res, 401, false, "Token expired");
+    }
+
+    if (error.name === "JsonWebTokenError") {
+      return sendResponse(res, 401, false, "Invalid token");
+    }
+
+    return sendResponse(res, 401, false, "Not authorized, authentication failed");
   }
 };
