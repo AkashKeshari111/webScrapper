@@ -14,7 +14,7 @@ export const authMiddleware = async (req, res, next) => {
       return sendResponse(res, 401, false, "Not authorized, no token found");
     }
 
-    const decoded = Jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
     req.user = {
       id: decoded.id,
@@ -23,6 +23,7 @@ export const authMiddleware = async (req, res, next) => {
 
     next();
   } catch (error) {
+    console.log(error)
     return sendResponse(res, 401, false, "Not authorized, token failed");
   }
 };

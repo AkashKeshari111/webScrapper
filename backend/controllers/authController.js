@@ -65,7 +65,9 @@ export const loginUser = async (req, res) => {
       return sendResponse(res, 401, false, "Invalid credentials");
     }
 
-    return sendResponse(res, 200, true, "Login successful");
+    return sendResponse(res, 200, true, "Login successful",{
+        token:generateToken({id:user._id,email:user.email})
+      });
   } catch (error) {
     return sendResponse(res, 500, false, "Server error");
   }
