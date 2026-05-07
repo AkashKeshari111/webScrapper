@@ -28,6 +28,7 @@ export const registerUser = async (req, res) => {
     }
 
     const userExist = await User.findOne({ email });
+
     if (userExist) {
       return sendResponse(res, 400, false, "User already exists");
     }
@@ -40,11 +41,24 @@ export const registerUser = async (req, res) => {
       password: hashPassword,
     });
 
+    const token = generateToken({
+      id: user._id,
+      email: user.email,
+    });
+
+    const isProduction = process.env.NODE_ENV === "production";
+
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: isProduction ? "strict" : "lax",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
     return sendResponse(res, 201, true, "User registered successfully", {
       _id: user._id,
       name: user.name,
       email: user.email,
-      token: generateToken({ id: user._id }),
     });
   } catch (error) {
     return sendResponse(res, 500, false, "Server error");
@@ -55,6 +69,7 @@ export const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
 
+    // Validation
     if (!email || !password) {
       return sendResponse(res, 400, false, "Email and password are required");
     }
@@ -65,10 +80,32 @@ export const loginUser = async (req, res) => {
       return sendResponse(res, 401, false, "Invalid credentials");
     }
 
-    return sendResponse(res, 200, true, "Login successful",{
-        token:generateToken({id:user._id,email:user.email})
-      });
+    const token = generateToken({
+      id: user._id,
+      email: user.email,
+    });
+
+    const isProduction = process.env.NODE_ENV === "production";
+
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: isProduction ? "strict" : "lax",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
+    return sendResponse(res, 200, true, "Login successful", {
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+    });
   } catch (error) {
     return sendResponse(res, 500, false, "Server error");
   }
+};
+
+export const logoutUser = async (req, res) => {
+  res.clearCookie("token");
+
+  return sendResponse(res, 200, true, "Logout successful");
 };
