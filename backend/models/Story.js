@@ -1,6 +1,6 @@
 import { model, Schema } from "mongoose";
 
-const storyBookmarkSchema = new Schema(
+const storySchema = new Schema(
   {
     title: {
       type: String,
@@ -38,5 +38,5 @@ const storyBookmarkSchema = new Schema(
   },
 );
 
-const StoryBookmark = model("StoryBookmark", storyBookmarkSchema);
-export default StoryBookmark;
+const Story = model("Story", storySchema);
+export default Story;
