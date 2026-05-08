@@ -14,7 +14,7 @@ dotenv.config();
 const app = express();
 
 app.use(cors({
-  origin: "https://scrapenews.vercel.app",
+  origin: ["https://scrapenews.vercel.app"],
   credentials: true,
 }));
 app.use(express.json());
