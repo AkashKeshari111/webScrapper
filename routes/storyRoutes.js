@@ -1,5 +1,6 @@
 import express from "express";
 import {
+  getBookmarks,
   getSingleStory,
   getStories,
   toggleBookmark,
@@ -11,5 +12,6 @@ const storyRouter = express.Router();
 storyRouter.get("/", getStories);
 storyRouter.get("/:id", getSingleStory);
 storyRouter.post("/:id/bookmark", authMiddleware, toggleBookmark);
+
 
 export default storyRouter;

@@ -39,6 +39,7 @@ export const getStories = async (req, res) => {
   }
 };
 
+
 export const getSingleStory = async (req, res) => {
   try {
     const { id } = req.params;
@@ -73,25 +74,40 @@ export const toggleBookmark = async (req, res) => {
     }
 
     const alreadyBookmarked = user.bookmarks.some(
-      (id) => id.toString() === storyId,
+      (id) => id.toString() === storyId
     );
 
     if (alreadyBookmarked) {
-      user.bookmarks = user.bookmarks.filter((id) => id.toString() !== storyId);
+      user.bookmarks = user.bookmarks.filter(
+        (id) => id.toString() !== storyId
+      );
     } else {
       user.bookmarks.push(storyId);
     }
 
     await user.save();
 
+    await user.populate("bookmarks");
+
     return sendResponse(
       res,
       200,
       true,
       alreadyBookmarked ? "Bookmark removed" : "Bookmark added",
-      user.bookmarks,
+      user.bookmarks
     );
   } catch (error) {
     return sendResponse(res, 500, false, "Failed to toggle bookmark");
+  }
+};
+
+export const getBookmarks = async (req, res) => {
+  const {id}=req.user;
+  try {
+    const user = await User.findById(id).populate("bookmarks");
+
+    return sendResponse(res, 200, true, "Bookmarks fetched", user.bookmarks);
+  } catch (error) {
+    return sendResponse(res, 500, false, "Failed to fetch bookmarks");
   }
 };

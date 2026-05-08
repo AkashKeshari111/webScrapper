@@ -7,6 +7,7 @@ import authRouter from "./routes/authRoutes.js";
 import scraperRouter from "./routes/scraperRoutes.js";
 import { scrapeStoriesService } from "./services/scraperService.js";
 import storyRouter from "./routes/storyRoutes.js";
+import bookmarkRouter from "./routes/bookmarkRoutes.js";
 
 dotenv.config();
 
@@ -22,6 +23,8 @@ app.use(cookieParser());
 app.use("/api/auth",authRouter);
 app.use("/api",scraperRouter);
 app.use("/api/stories",storyRouter);
+app.use("/api",bookmarkRouter);
+
 
 app.get("/", (req, res) => {
   res.send({ msg: "Runnig app testing..." });
