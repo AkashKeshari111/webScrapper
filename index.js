@@ -14,7 +14,7 @@ dotenv.config();
 const app = express();
 
 app.use(cors({
-  origin: "http://localhost:5173",
+  origin: "https://scrapenews.vercel.app",
   credentials: true,
 }));
 app.use(express.json());
@@ -38,7 +38,7 @@ const startServer = async () => {
     console.log("DB Connected successfully");
 
     app.listen(PORT, async () => {
-      console.log(`Server running on http://localhost:${PORT}`);
+      console.log(`Server running on ${PORT}`);
 
       await scrapeStoriesService();
     });
