@@ -2,22 +2,25 @@ import mongoose from "mongoose";
 import Story from "../models/Story.js";
 import User from "../models/User.js";
 import { sendResponse } from "../utils/response.js";
+import { formatDate } from "../utils/formatDate.js";
 
 export const getStories = async (req, res) => {
   try {
     const { page: pageQuery, limit: limitQuery } = req.query;
 
     const page = Math.max(Number(pageQuery) || 1, 1);
-
     const limit = Math.min(Math.max(Number(limitQuery) || 10, 1), 50);
-
     const skip = (page - 1) * limit;
 
     const [stories, totalStories] = await Promise.all([
       Story.find().sort({ points: -1 }).skip(skip).limit(limit),
-
       Story.countDocuments(),
     ]);
+
+    const formattedStories = stories.map((story) => ({
+      ...story._doc,
+      postedAt: formatDate(story.createdAt),
+    }));
 
     const totalPages = Math.ceil(totalStories / limit);
 
@@ -26,18 +29,19 @@ export const getStories = async (req, res) => {
       200,
       true,
       "Stories fetched successfully",
-      stories,
+      formattedStories,
       {
         currentPage: page,
         totalPages,
         totalStories,
         limit,
-      },
+      }
     );
   } catch (error) {
     return sendResponse(res, 500, false, "Failed to fetch stories");
   }
 };
+
 
 
 export const getSingleStory = async (req, res) => {
@@ -54,11 +58,23 @@ export const getSingleStory = async (req, res) => {
       return sendResponse(res, 404, false, "Story not found");
     }
 
-    return sendResponse(res, 200, true, "Story fetched successfully", story);
+    const formattedStory = {
+      ...story._doc,
+      postedAt: formatDate(story.createdAt),
+    };
+
+    return sendResponse(
+      res,
+      200,
+      true,
+      "Story fetched successfully",
+      formattedStory
+    );
   } catch (error) {
     return sendResponse(res, 500, false, "Failed to fetch story");
   }
 };
+
 
 export const toggleBookmark = async (req, res) => {
   try {
@@ -86,7 +102,6 @@ export const toggleBookmark = async (req, res) => {
     }
 
     await user.save();
-
     await user.populate("bookmarks");
 
     return sendResponse(
@@ -101,12 +116,25 @@ export const toggleBookmark = async (req, res) => {
   }
 };
 
+
 export const getBookmarks = async (req, res) => {
-  const {id}=req.user;
   try {
+    const { id } = req.user;
+
     const user = await User.findById(id).populate("bookmarks");
 
-    return sendResponse(res, 200, true, "Bookmarks fetched", user.bookmarks);
+    const formattedBookmarks = user.bookmarks.map((story) => ({
+      ...story._doc,
+      postedAt: formatDate(story.createdAt),
+    }));
+
+    return sendResponse(
+      res,
+      200,
+      true,
+      "Bookmarks fetched",
+      formattedBookmarks
+    );
   } catch (error) {
     return sendResponse(res, 500, false, "Failed to fetch bookmarks");
   }
